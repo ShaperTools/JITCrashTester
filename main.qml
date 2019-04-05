@@ -43,16 +43,16 @@ Window {
             if(loopCount == 0) {
                 callLongFunction()
                 callShortFunction()
-                // If I don't do this 1000 times, it never frees the JITted executable memory. I assume there's some additional cache
-                // somewhere but I didn't bother to investigate this either.
-                for(j = 0; j < 1000; j++) callLongFunction()
             }
             else if(loopCount == 1) {
                 callLongFunction()
                 callShortFunction()
             }
 
+            // Run the garbage collector to make sure stuff gets freed.
+            gc()
             loopCount++
+            console.log("Done")
         }
     }
 }
