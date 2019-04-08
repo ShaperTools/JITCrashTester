@@ -23,3 +23,9 @@ What it *should* do is call `BranchCompactingLinkBuffer<MacroAssembler>::perform
 (the critical difference being `m_initialSize`). There is even a comment to the effect that this is the version of `performFinalization()` that we should expect to see called. However, it is not what is being called, because when the function is called from the base class, the base class version of the function is called rather than the derived class version.
 
 5. Call the 0.1-page function. It resides in memory that will no longer be marked executable, and you will get a segfault.
+
+# Patch
+
+* [0001-Ensure-the-correct-version-of-LinkBuffer-s-performFi.patch](0001-Ensure-the-correct-version-of-LinkBuffer-s-performFi.patch)
+
+minimal patch which addresses the current crash

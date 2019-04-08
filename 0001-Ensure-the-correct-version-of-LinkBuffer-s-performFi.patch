@@ -1,0 +1,53 @@
+From 647fe5f886b5405ec0640cbcd75ddb5f93741f50 Mon Sep 17 00:00:00 2001
+From: Alec Rivers <alec@shapertools.com>
+Date: Mon, 8 Apr 2019 09:43:44 -0700
+Subject: [PATCH] Ensure the correct version of LinkBuffer's
+ performFinalization() is called
+
+---
+ assembler/LinkBuffer.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/assembler/LinkBuffer.h b/assembler/LinkBuffer.h
+index c79b066..f9c10f6 100644
+--- a/assembler/LinkBuffer.h
++++ b/assembler/LinkBuffer.h
+@@ -243,7 +243,7 @@ protected:
+ 
+     inline void linkCode(void* ownerUID, JITCompilationEffort);
+ 
+-    inline void performFinalization();
++    virtual void performFinalization();
+ 
+ #if DUMP_LINK_STATISTICS
+     static void dumpLinkStatistics(void* code, size_t initialSize, size_t finalSize);
+@@ -342,7 +342,7 @@ inline void LinkBufferBase<MacroAssembler, ExecutableOffsetCalculator>::linkCode
+ }
+ 
+ template <typename MacroAssembler, template <typename T> class ExecutableOffsetCalculator>
+-inline void LinkBufferBase<MacroAssembler, ExecutableOffsetCalculator>::performFinalization()
++void LinkBufferBase<MacroAssembler, ExecutableOffsetCalculator>::performFinalization()
+ {
+     // NOTE: This function is specialized in LinkBuffer<MacroAssemblerARMv7>
+ #ifndef NDEBUG
+@@ -388,7 +388,7 @@ public:
+         linkCode(ownerUID, effort);
+     }
+ 
+-    inline void performFinalization();
++    virtual void performFinalization();
+ 
+     inline void linkCode(void* ownerUID, JITCompilationEffort);
+ 
+@@ -412,7 +412,7 @@ private:
+ };
+ 
+ template <typename MacroAssembler>
+-inline void BranchCompactingLinkBuffer<MacroAssembler>::performFinalization()
++void BranchCompactingLinkBuffer<MacroAssembler>::performFinalization()
+ {
+ #ifndef NDEBUG
+     ASSERT(!m_completed);
+-- 
+2.17.1
+
