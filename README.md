@@ -1,12 +1,12 @@
 # JITCrashTester
 A reproduction of a crash in the JavaScriptCore Macro Assembler as used in Qt 5.12.2.
 
-The crash in question takes the form of a segfault on attempting to execute code in memory not marked executable. I believe it is caused by a bug in the templating of the branch compacting link buffer. An example of how this crash can arise is as follows:
+The crash in question takes the form of a segfault on attempting to execute code in memory not marked executable. I believe it is caused by a bug in the syntax of inheritance and member functions of the branch compacting link buffer. An example of how this crash can arise is as follows:
 
-1. JIT a function that takes 1.5 pages of memory. It will allocate two pages and leave the second half of the second page free. On ARM it will compact this code to, say, 1.3 pages.
-2. JIT a function that takes 0.1 pages of memory. It will be put into the empty second half of the second page. On ARM, it will compact this slightly as well.
+1. JIT a function that takes 1.5 pages of memory. It will allocate two pages and leave the second half of the second page free.
+2. JIT a function that takes 0.1 pages of memory. It will be put into the empty second half of the second page.
 3. Release the first function.
-4. JIT a function that takes 1.1 pages of memory. It will be put into the empty area freed by the first function. On ARM, suppose this is compacted to 0.9 pages of memory.
+4. JIT a function that takes 1.1 pages of memory. It will be put into the empty area freed by the first function. On ARM, suppose this is then compacted to 0.9 pages of memory (all functions on ARM are compacted).
 
 The bug occurs at this point. First, `BranchCompactingLinkBuffer<MacroAssembler>::linkCode(...)`, it will make both pages writable initially due to the line
   
@@ -20,6 +20,6 @@ What it *should* do is call `BranchCompactingLinkBuffer<MacroAssembler>::perform
   
 `ExecutableAllocator::makeExecutable(code(), m_initialSize);`
   
-(the critical difference being `m_initialSize`). There is even a comment to the effect that this is the version of `performFinalization()` that we should expect to see called. However, it is not what is being called, I guess due to a mistake in the templating syntax.
+(the critical difference being `m_initialSize`). There is even a comment to the effect that this is the version of `performFinalization()` that we should expect to see called. However, it is not what is being called, because when the function is called from the base class, the base class version of the function is called rather than the derived class version.
 
 5. Call the 0.1-page function. It resides in memory that will no longer be marked executable, and you will get a segfault.
